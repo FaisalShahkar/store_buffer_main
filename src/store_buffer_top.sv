@@ -62,7 +62,7 @@ module store_buffer_top (
     logic                           stb_full;     // Store Buffer full signal
     logic                           stb_empty;    // Store Buffer empty signal
     logic                           rd_sel;       // selection for read mux
-    logic                           stb_bypass;   // Buffer Bypass signal
+    // logic                           stb_bypass;   // Buffer Bypass signal
     logic                           stb_stall;    // Buffer Stall signal
 
     logic                           stb_ack;
@@ -88,7 +88,7 @@ module store_buffer_top (
 
 /* =========================================== Bypassing Store buffer for Load Instructions ====================== */ 
     // Store Buffer bypass for load instructions
-    assign stb_bypass = ((lsummu2stb_req & !lsummu2stb_w_en) | (!lsummu2stb_req & !lsummu2stb_w_en)) & stb_empty;
+    // assign stb_bypass = ((lsummu2stb_req & !lsummu2stb_w_en) | (!lsummu2stb_req & !lsummu2stb_w_en)) & stb_empty;
 
     always_comb begin
             case (stb_bypass)

@@ -7,7 +7,7 @@
 // Author: M.Faisal Shahkar & M.Nasir, UET Lahore
 // Date: 17.12.2024
 
-module store_buffer_fifo (
+module stb_datapath (
     input  logic clk,
     input  logic rst_n,
 

@@ -90,49 +90,49 @@ module store_buffer_top (
     // Store Buffer bypass for load instructions
     // assign stb_bypass = ((lsummu2stb_req & !lsummu2stb_w_en) | (!lsummu2stb_req & !lsummu2stb_w_en)) & stb_empty;
 
-    always_comb begin
-            case (stb_bypass)
-            1'b1: begin  
-                stb2lsummu_ack      = dcache2stb_ack;
-                stb2lsummu_rdata    = dcache2stb_rdata;
+    // always_comb begin
+    //         case (stb_bypass)
+    //         1'b1: begin  
+    //             stb2lsummu_ack      = dcache2stb_ack;
+    //             stb2lsummu_rdata    = dcache2stb_rdata;
 
-                stb2dcache_addr     = lsummu2stb_addr;
-                stb2dcache_wdata    = lsummu2stb_wdata;
-                stb2dcache_sel_byte = lsummu2stb_sel_byte;
-                stb2dcache_req      = lsummu2stb_req;
-                stb2dcache_w_en     = lsummu2stb_w_en;
+    //             stb2dcache_addr     = lsummu2stb_addr;
+    //             stb2dcache_wdata    = lsummu2stb_wdata;
+    //             stb2dcache_sel_byte = lsummu2stb_sel_byte;
+    //             stb2dcache_req      = lsummu2stb_req;
+    //             stb2dcache_w_en     = lsummu2stb_w_en;
 
-                dmem_sel_o          = dmem_sel_i;
-            end
-            1'b0: begin
-                stb2lsummu_ack      = stb_ack;
-                stb2lsummu_rdata    = '0;
+    //             dmem_sel_o          = dmem_sel_i;
+    //         end
+    //         1'b0: begin
+    //             stb2lsummu_ack      = stb_ack;
+    //             stb2lsummu_rdata    = '0;
 
-                stb2dcache_addr     = stb_addr;
-                stb2dcache_wdata    = stb_wdata;
-                stb2dcache_sel_byte = stb_sel_byte;
-                stb2dcache_req      = stb_req;
-                stb2dcache_w_en     = stb_w_en;
+    //             stb2dcache_addr     = stb_addr;
+    //             stb2dcache_wdata    = stb_wdata;
+    //             stb2dcache_sel_byte = stb_sel_byte;
+    //             stb2dcache_req      = stb_req;
+    //             stb2dcache_w_en     = stb_w_en;
 
-                dmem_sel_o          = dm_sel;
-            end
-            default: begin
-                stb2lsummu_ack      = stb_ack;
-                stb2lsummu_rdata    = '0;
+    //             dmem_sel_o          = dm_sel;
+    //         end
+    //         default: begin
+    //             stb2lsummu_ack      = stb_ack;
+    //             stb2lsummu_rdata    = '0;
 
-                stb2dcache_addr     = stb_addr;
-                stb2dcache_wdata    = stb_wdata;
-                stb2dcache_sel_byte = stb_sel_byte;
-                stb2dcache_req      = stb_req;
-                stb2dcache_w_en     = stb_w_en;
+    //             stb2dcache_addr     = stb_addr;
+    //             stb2dcache_wdata    = stb_wdata;
+    //             stb2dcache_sel_byte = stb_sel_byte;
+    //             stb2dcache_req      = stb_req;
+    //             stb2dcache_w_en     = stb_w_en;
 
-                dmem_sel_o          = dm_sel;
-            end
-            endcase
-    end
+    //             dmem_sel_o          = dm_sel;
+    //         end
+    //         endcase
+    // end
 
 /* =========================================== Store Buffer Datapath ============================================= */
-    store_buffer_datapath u_store_buffer (
+    stb_datapath u_store_buffer (
         .clk                    (clk),
         .rst_n                  (rst_n),
         
@@ -145,13 +145,13 @@ module store_buffer_top (
         .wr_en                  (wr_en),
 
         // stb_cache_controller --> store_buffer_datapath
-        .rd_en                  (rd_en),
+        // .rd_en                  (rd_en),
         .rd_sel                 (rd_sel),
 
         // store_buffer_datapath --> dcache
-        .stb_addr               (stb_addr),
-        .stb_wdata              (stb_wdata),
-        .stb_sel_byte           (stb_sel_byte),
+        .stb2dcache_addr               (stb_addr),
+        .stb2dcache_wdata              (stb_wdata),
+        .stb2dcache_sel_byte           (stb_sel_byte),
 
         // store_buffer --> store_buffer_controllers
         .stb_full               (stb_full),
@@ -159,7 +159,7 @@ module store_buffer_top (
     );
 
 /* =========================================== LSU to Store Buffer Controller ==================================== */
-    lsu_stb_controller u_lsu_stb_controller (
+    stb_controller u_lsu_stb_controller (
         .clk                    (clk),
         .rst_n                  (rst_n),
 
@@ -177,30 +177,34 @@ module store_buffer_top (
         .stb_stall              (stb_stall),
 
         // lsu_stb_controller --> store_buffer_datapath
-        .wr_en                  (wr_en)
+        .stb_wr_en                  (wr_en),
+        .stb_r_en                   (rd_en),
+
+        .cache_write_ack            (    ),
+        .stb_initial_read           (    )
     );
 
-/* =========================================== Store Buffer to Cache Controller ================================== */
-    stb_cache_controller u_stb_cache_controller (
-        .clk                    (clk),
-        .rst_n                  (rst_n),
+// /* =========================================== Store Buffer to Cache Controller ================================== */
+//     stb_cache_controller u_stb_cache_controller (
+//         .clk                    (clk),
+//         .rst_n                  (rst_n),
 
-        // store_buffer_datapath --> stb_cache_controller
-        .stb_full               (stb_full),
-        .stb_empty              (stb_empty),
+//         // store_buffer_datapath --> stb_cache_controller
+//         .stb_full               (stb_full),
+//         .stb_empty              (stb_empty),
 
-        // dcache --> stb_cache_controller
-        .dcache2stb_ack         (dcache2stb_ack),
+//         // dcache --> stb_cache_controller
+//         .dcache2stb_ack         (dcache2stb_ack),
 
-        // stb_cache_controller --> store_buffer_datapath
-        .rd_en                  (rd_en),
-        .rd_sel                 (rd_sel),
+//         // stb_cache_controller --> store_buffer_datapath
+//         .rd_en                  (rd_en),
+//         .rd_sel                 (rd_sel),
 
-        // stb_cache_controller --> dcache
-        .stb_req                (stb_req),
-        .stb_w_en               (stb_w_en),
-        .dm_sel                 (dm_sel)
-    );
+//         // stb_cache_controller --> dcache
+//         .stb_req                (stb_req),
+//         .stb_w_en               (stb_w_en),
+//         .dm_sel                 (dm_sel)
+//     );
     
 /* =========================================== Output signals ==================================================== */ 
     assign stb2dcache_empty         = stb_empty;
